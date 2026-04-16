@@ -1,5 +1,5 @@
 # Changes here will be overwritten by Copier; do not edit manually.
-_commit: 52586a4
+_commit: 754563b
 _src_path: /home/maxtkc/Documents/bare-chassis
 description: SQLModel ORM models and Alembic migrations for GTFS transit feed management
 docker_base: alpine
