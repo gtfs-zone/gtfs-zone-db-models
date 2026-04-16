@@ -22,6 +22,10 @@ DATABASE_URL="..." alembic revision --autogenerate -m "description"
 cz commit
 ```
 
+## Rules
+
+- Never add Co-Authored-By trailers to commit messages.
+
 ## Architecture
 
 This is a Python 3.13+ library (no web framework) providing SQLModel ORM models and Alembic migrations for a GTFS transit feed management system. The package lives in `src/railroad_club/`.
