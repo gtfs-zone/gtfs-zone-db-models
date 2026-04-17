@@ -32,6 +32,7 @@ COPY --from=builder /app/src /app/src
 
 ENV PATH="/app/.venv/bin:$PATH"
 
+
 USER bridge
 
 
