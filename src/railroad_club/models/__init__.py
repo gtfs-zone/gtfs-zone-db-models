@@ -1,4 +1,5 @@
 from railroad_club.models.driver import Driver
+from railroad_club.models.driver_rule import DriverRule
 from railroad_club.models.feed import Feed
 from railroad_club.models.gtfs_static import (
     GtfsRoute,
@@ -15,6 +16,7 @@ from railroad_club.models.user import User
 
 __all__ = [
     "Driver",
+    "DriverRule",
     "Feed",
     "GtfsRoute",
     "GtfsStaticFeed",
