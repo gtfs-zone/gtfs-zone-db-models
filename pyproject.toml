@@ -2,6 +2,7 @@
 name = "railroad-club"
 version = "0.1.0"
 requires-python = ">=3.13"
+description = "SQLModel ORM models and Alembic migrations for GTFS transit feed management"
 dependencies = [
     "sqlmodel>=0.0.21",
     "alembic",
@@ -9,25 +10,32 @@ dependencies = [
     "pydantic-settings>=2.6",
 ]
 
-[build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
+[dependency-groups]
+dev = [
+    "commitizen",
+    "pre-commit",
+    "ruff",
+]
 
 [project.scripts]
 railroad-club-migrate = "railroad_club._migrate:main"
 
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
 [tool.hatch.build.targets.wheel]
 packages = ["src/railroad_club"]
-
-[dependency-groups]
-dev = ["commitizen", "pre-commit", "ruff"]
 
 [tool.ruff]
 target-version = "py313"
 line-length = 88
 
 [tool.ruff.lint]
-select = ["E", "F", "I", "UP", "B", "SIM"]
+select = ["E", "F", "I", "UP", "B", "SIM", "ANN", "TCH", "RUF"]
+
+[tool.ruff.lint.per-file-ignores]
+"src/railroad_club/__init__.py" = ["F401"]
 
 [tool.commitizen]
 name = "cz_conventional_commits"
