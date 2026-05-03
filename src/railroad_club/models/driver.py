@@ -5,6 +5,7 @@ from pydantic import field_validator
 from sqlmodel import Field, Relationship, SQLModel
 
 if TYPE_CHECKING:
+    from railroad_club.models.driver_rule import DriverRule
     from railroad_club.models.feed import Feed
 
 _ALPHANUMERIC_RE = re.compile(r"^[a-zA-Z0-9]{3,32}$")
@@ -17,12 +18,13 @@ class Driver(SQLModel, table=True):
     feed_id: int = Field(foreign_key="feed.id")
 
     feed: "Feed" = Relationship(back_populates="drivers")
+    rules: list["DriverRule"] = Relationship(back_populates="driver")
 
     @field_validator("username", "password")
     @classmethod
     def validate_alphanumeric(cls, v: str) -> str:
         if not _ALPHANUMERIC_RE.match(v):
-            raise ValueError("Must be 3–32 alphanumeric characters")
+            raise ValueError("Must be 3-32 alphanumeric characters")
         return v
 
     def __str__(self) -> str:
