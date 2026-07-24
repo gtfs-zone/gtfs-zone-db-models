@@ -4,14 +4,14 @@ from typing import TYPE_CHECKING
 from sqlmodel import Field, Relationship, SQLModel
 
 if TYPE_CHECKING:
-    from railroad_club.models.driver import Driver
+    from railroad_club.models.tracker import Tracker
 
 
-class DriverRule(SQLModel, table=True):
-    __tablename__ = "driver_rule"
+class TrackerRule(SQLModel, table=True):
+    __tablename__ = "tracker_rule"
 
     id: int | None = Field(default=None, primary_key=True)
-    driver_id: int = Field(foreign_key="driver.id")
+    tracker_id: str = Field(foreign_key="tracker.id")
     trip_id: str = Field(max_length=256)
     monday: bool = Field(default=False)
     tuesday: bool = Field(default=False)
@@ -23,4 +23,4 @@ class DriverRule(SQLModel, table=True):
     start_time: time
     end_time: time
 
-    driver: "Driver" = Relationship(back_populates="rules")
+    tracker: "Tracker" = Relationship(back_populates="rules")

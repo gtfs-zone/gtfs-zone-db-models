@@ -5,9 +5,9 @@ from pydantic import AnyHttpUrl, TypeAdapter, field_validator
 from sqlmodel import Field, Relationship, SQLModel
 
 if TYPE_CHECKING:
-    from railroad_club.models.driver import Driver
     from railroad_club.models.gtfs_static import GtfsStaticFeed
     from railroad_club.models.service_alert import ServiceAlert
+    from railroad_club.models.tracker import Tracker
     from railroad_club.models.trip_alias import TripAlias
     from railroad_club.models.user import User
 
@@ -23,7 +23,7 @@ class Feed(SQLModel, table=True):
     owner_id: int = Field(foreign_key="user.id")
     gtfs_static_feed_id: int | None = Field(default=None, foreign_key="gtfs_static_feed.id")
     owner: "User" = Relationship(back_populates="feeds")
-    drivers: list["Driver"] = Relationship(back_populates="feed")
+    trackers: list["Tracker"] = Relationship(back_populates="feed")
     alerts: list["ServiceAlert"] = Relationship(back_populates="feed")
     aliases: list["TripAlias"] = Relationship(back_populates="feed")
     gtfs_static_feed: Optional["GtfsStaticFeed"] = Relationship()

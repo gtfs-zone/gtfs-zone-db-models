@@ -8,6 +8,7 @@ dependencies = [
     "alembic",
     "asyncpg",
     "pydantic-settings>=2.6",
+    "petname>=2.9",
 ]
 
 [dependency-groups]
