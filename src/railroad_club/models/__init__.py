@@ -11,7 +11,6 @@ from railroad_club.models.informed_entity import InformedEntity
 from railroad_club.models.service_alert import ServiceAlert
 from railroad_club.models.tracker import Tracker
 from railroad_club.models.tracker_rule import TrackerRule
-from railroad_club.models.trip_alias import TripAlias
 from railroad_club.models.user import User
 
 __all__ = [
@@ -26,6 +25,5 @@ __all__ = [
     "ServiceAlert",
     "Tracker",
     "TrackerRule",
-    "TripAlias",
     "User",
 ]

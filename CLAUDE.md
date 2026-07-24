@@ -32,7 +32,7 @@ This is a Python 3.13+ library (no web framework) providing SQLModel ORM models 
 
 **Key entities and relationships:**
 - `User` — provider-based OAuth identity (provider + provider_subject unique pair, e.g. "dex")
-- `Feed` — a GTFS feed owned by a User; has many Drivers, ServiceAlerts, TripAliases, and one optional GtfsStaticFeed
+- `Feed` — a GTFS feed owned by a User; has many Drivers, ServiceAlerts, and one optional GtfsStaticFeed
 - `Driver` — credentials for accessing a feed (username/password)
 - `ServiceAlert` → `InformedEntity` — GTFS-RT service alerts with normalized entity selectors
 - `GtfsStaticFeed` → `GtfsStop`, `GtfsRoute`, `GtfsTrip`, `GtfsStopTime` — loaded GTFS static data scoped per feed
