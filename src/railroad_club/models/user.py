@@ -6,6 +6,7 @@ from sqlmodel import Field, Relationship, SQLModel
 
 if TYPE_CHECKING:
     from railroad_club.models.feed import Feed
+    from railroad_club.models.feed_member import FeedMember
     from railroad_club.models.identity import Identity
 
 
@@ -37,6 +38,10 @@ class User(SQLModel, table=True):
         cascade_delete=True,
     )
     feeds: list["Feed"] = Relationship(back_populates="owner")
+    memberships: list["FeedMember"] = Relationship(
+        back_populates="user",
+        sa_relationship_kwargs={"foreign_keys": "[FeedMember.user_id]"},
+    )
 
     def __str__(self) -> str:
         return self.display_name or self.primary_email or f"user {self.id}"

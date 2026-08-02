@@ -1,4 +1,5 @@
 from railroad_club.models.feed import Feed
+from railroad_club.models.feed_member import FeedMember
 from railroad_club.models.gtfs_static import (
     GtfsRoute,
     GtfsStaticFeed,
@@ -16,6 +17,7 @@ from railroad_club.models.user import User
 
 __all__ = [
     "Feed",
+    "FeedMember",
     "GtfsRoute",
     "GtfsStaticFeed",
     "GtfsStop",
