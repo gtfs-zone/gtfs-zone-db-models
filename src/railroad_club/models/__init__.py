@@ -7,6 +7,7 @@ from railroad_club.models.gtfs_static import (
     GtfsTrip,
     LoadStatus,
 )
+from railroad_club.models.identity import Identity
 from railroad_club.models.informed_entity import InformedEntity
 from railroad_club.models.service_alert import ServiceAlert
 from railroad_club.models.tracker import Tracker
@@ -20,6 +21,7 @@ __all__ = [
     "GtfsStop",
     "GtfsStopTime",
     "GtfsTrip",
+    "Identity",
     "InformedEntity",
     "LoadStatus",
     "ServiceAlert",
