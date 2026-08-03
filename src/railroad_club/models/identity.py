@@ -31,9 +31,21 @@ class Identity(SQLModel, table=True):
     # that is exactly the case account linking exists to handle.
     email: str | None = Field(default=None, index=True)
     email_verified: bool = False
+    # Which upstream provider the OIDC issuer brokered this login through
+    # ("github", "google"), when it tells us. Display only — nothing may
+    # authorise or match on it; ``(provider, provider_subject)`` remains the
+    # only key. Null means the issuer said nothing, i.e. a direct login.
+    broker_alias: str | None = Field(default=None)
     linked_at: datetime = Field(
         default_factory=_utcnow,
         sa_column=Column(DateTime(timezone=True), nullable=False),
+    )
+    # Roughly when this credential was last used — stamped on login, not on
+    # every request. Its job is to make a dormant duplicate principal visible
+    # on the account page, which is not something an exact value helps with.
+    last_seen_at: datetime | None = Field(
+        default=None,
+        sa_column=Column(DateTime(timezone=True), nullable=True),
     )
 
     user: "User" = Relationship(back_populates="identities")
