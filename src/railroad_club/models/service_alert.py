@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Column, DateTime
+from sqlalchemy import Column, DateTime, Text
 from sqlmodel import Field, Relationship, SQLModel
 
 if TYPE_CHECKING:
@@ -16,7 +16,7 @@ class ServiceAlert(SQLModel, table=True):
     feed_id: int = Field(foreign_key="feed.id")
 
     header_text: str = Field(max_length=512)
-    description_text: str = Field(max_length=2048)
+    description_text: str = Field(sa_column=Column(Text, nullable=False))
     url: str | None = Field(default=None, max_length=512)
 
     cause: str | None = Field(default=None)
