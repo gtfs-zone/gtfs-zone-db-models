@@ -11,7 +11,7 @@ Nullable, with no backfill. An existing row fills itself in the next time that
 credential signs in, and a row that never signs in again is precisely the one
 worth seeing as blank.
 
-Revision ID: d7e8f9a0b1c2
+Revision ID: e8f9a0b1c2d3
 Revises: c6d7e8f9a0b1
 Create Date: 2026-08-03 16:00:00.000000
 
@@ -23,7 +23,7 @@ import sqlalchemy as sa
 import sqlmodel
 from alembic import op
 
-revision: str = "d7e8f9a0b1c2"
+revision: str = "e8f9a0b1c2d3"
 down_revision: str | Sequence[str] | None = "c6d7e8f9a0b1"
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
