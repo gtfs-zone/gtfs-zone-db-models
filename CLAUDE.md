@@ -31,11 +31,11 @@ cz commit
 This is a Python 3.13+ library (no web framework) providing SQLModel ORM models and Alembic migrations for a GTFS transit feed management system. The package lives in `src/railroad_club/`.
 
 **Key entities and relationships:**
-- `User` — provider-based OAuth identity (provider + provider_subject unique pair, e.g. "dex")
-- `Feed` — a GTFS feed owned by a User; has many Drivers, ServiceAlerts, and one optional GtfsStaticFeed
-- `Driver` — credentials for accessing a feed (username/password)
-- `ServiceAlert` → `InformedEntity` — GTFS-RT service alerts with normalized entity selectors
-- `GtfsStaticFeed` → `GtfsStop`, `GtfsRoute`, `GtfsTrip`, `GtfsStopTime` — loaded GTFS static data scoped per feed
+- `User`: provider-based OAuth identity (provider + provider_subject unique pair, e.g. "dex")
+- `Feed`: a GTFS feed owned by a User; has many Drivers, ServiceAlerts, and one optional GtfsStaticFeed
+- `Driver`: credentials for accessing a feed (username/password)
+- `ServiceAlert` → `InformedEntity`: GTFS-RT service alerts with normalized entity selectors
+- `GtfsStaticFeed` → `GtfsStop`, `GtfsRoute`, `GtfsTrip`, `GtfsStopTime`: loaded GTFS static data scoped per feed
 
 **GtfsStopTime rule:** `arrival_time` and `departure_time` must never be null.
 

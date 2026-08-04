@@ -1,8 +1,8 @@
 """add identity.broker_alias and identity.last_seen_at
 
 ``provider`` is the OIDC issuer and reads ``keycloak`` for every row, which
-says nothing about how someone actually signed in. Keycloak knows — it sets an
-``identity_provider`` session note on a brokered login — so record it and show
+says nothing about how someone actually signed in. Keycloak knows: it sets an
+``identity_provider`` session note on a brokered login, so record it and show
 it, and record when the credential was last used. Both are display-only: the
 account page is where a duplicate or dormant principal has to become obvious,
 and neither column may be matched or authorised on.

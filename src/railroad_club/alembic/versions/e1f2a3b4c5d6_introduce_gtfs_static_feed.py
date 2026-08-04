@@ -51,7 +51,7 @@ def upgrade() -> None:
     # 3. Drop index on old gtfs_stop_time
     op.drop_index("ix_gtfs_stop_time_feed_trip", table_name="gtfs_stop_time")
 
-    # 4. Drop old GTFS tables (FK order) and feed_load_status — data is ephemeral
+    # 4. Drop old GTFS tables (FK order) and feed_load_status, since data is ephemeral
     op.drop_table("gtfs_stop_time")
     op.drop_table("gtfs_trip")
     op.drop_table("gtfs_route")

@@ -1,7 +1,7 @@
 """split user and identity
 
 Separates the person (``user``) from the credential (``identity``), so one
-person can sign in through several providers — GitHub and Google, say — and
+person can sign in through several providers (GitHub and Google, say) and
 land on the same account. ``user.provider`` / ``user.provider_subject`` move
 into ``identity``, one row per login method.
 
@@ -51,8 +51,8 @@ def upgrade() -> None:
     #
     # These subjects are whatever the old provider happened to emit and will
     # not match what a new IdP sends; a separate remap handles that at cutover.
-    # The point of the backfill is to keep `user.id` — and therefore feed
-    # ownership — intact.
+    # The point of the backfill is to keep `user.id`, and therefore feed
+    # ownership, intact.
     #
     # email_verified stays false: nothing recorded whether it ever was, and
     # guessing true here would hand account-linking a forged match to trust.
@@ -119,7 +119,7 @@ def downgrade() -> None:
         """
     )
     # Users created after the split have no identity only if something went
-    # wrong, but NOT NULL would fail on them — give them a placeholder that
+    # wrong, but NOT NULL would fail on them, so give them a placeholder that
     # cannot collide with a real subject.
     op.execute(
         """

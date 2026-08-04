@@ -21,7 +21,7 @@ class FeedMember(SQLModel, table=True):
 
     Modelled as a first-class row rather than a SQLModel ``link_model``
     many-to-many on purpose. A link_model would render in SQLAdmin as a
-    multi-select of every user in the database — an enumeration leak — leave
+    multi-select of every user in the database (an enumeration leak), leave
     nowhere to record who added whom, and lazy-load into ``MissingGreenlet``
     under the async session. Membership is therefore only ever changed through
     routes that check permission server-side.

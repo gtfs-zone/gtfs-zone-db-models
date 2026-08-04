@@ -21,7 +21,7 @@ depends_on: Union[str, Sequence[str], None] = None
 
 def upgrade() -> None:
     """Upgrade schema."""
-    # Drop all existing service alerts — informed_entity replaces the flat fields.
+    # Drop all existing service alerts; informed_entity replaces the flat fields.
     op.execute('DELETE FROM service_alert')
 
     op.drop_column('service_alert', 'agency_id')

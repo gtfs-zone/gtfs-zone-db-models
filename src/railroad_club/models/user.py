@@ -17,7 +17,7 @@ def _utcnow() -> datetime:
 class User(SQLModel, table=True):
     """A person, independent of how they sign in.
 
-    Credentials live in :class:`Identity` — one row per linked provider — so
+    Credentials live in :class:`Identity` (one row per linked provider), so
     that signing in with GitHub or with Google lands on the same ``User``, and
     so that everything keyed on a ``user.id`` (feeds, memberships) survives a
     change of identity provider.
