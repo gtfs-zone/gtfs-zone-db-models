@@ -39,11 +39,17 @@ _WEEKDAY_COLS = [
 
 
 class ResolvedTrip(NamedTuple):
-    """What the tracker is running, and which service day's run it is."""
+    """Which tracker this is, what it is running, and which service day's run.
+
+    ``trip_id`` and ``service_date`` are None together when the tracker exists
+    but no rule places it on a trip right now. That is a tracker with a fix and
+    no assignment, which is a thing to draw on a map rather than an error, so it
+    is deliberately not the same answer as "no such tracker".
+    """
 
     tracker_id: str
-    trip_id: str
-    service_date: date
+    trip_id: str | None
+    service_date: date | None
 
 
 def rule_applies_on(
@@ -82,11 +88,16 @@ def _load_exceptions(
 
 
 def resolve_tracker_trip(device_key: str, session: Session) -> ResolvedTrip | None:
-    """Resolve a Traccar ``uniqueId`` to the trip it is running, or None.
+    """Resolve a Traccar ``uniqueId`` to its tracker and the trip it is running.
+
+    None means there is no such tracker. A tracker with no trip comes back with
+    ``trip_id`` and ``service_date`` None, so a caller can still identify and
+    place it.
 
     Evaluation is in the feed's GTFS timezone. A feed with no loaded
-    ``GtfsStaticFeed``, or one with no timezone, resolves to None: there is no
-    safe answer without knowing what local time means for that feed.
+    ``GtfsStaticFeed``, or one with no timezone, yields no trip: there is no
+    safe answer about *which* trip without knowing what local time means for
+    that feed, and guessing one is worse than reporting none.
 
     Later service dates win, then the last-created rule, so a >24h window that
     matches on both evaluated days reports the run that started most recently.
@@ -106,7 +117,7 @@ def resolve_tracker_trip(device_key: str, session: Session) -> ResolvedTrip | No
     tracker, _feed, static_feed = row
 
     if static_feed is None or static_feed.timezone is None:
-        return None
+        return ResolvedTrip(tracker.id, None, None)
 
     tz = ZoneInfo(static_feed.timezone)
     now = datetime.now(tz)
@@ -117,7 +128,7 @@ def resolve_tracker_trip(device_key: str, session: Session) -> ResolvedTrip | No
     ).all()
     exceptions = _load_exceptions(session, [r.id for r in rules if r.id is not None])
 
-    best: ResolvedTrip | None = None
+    best = ResolvedTrip(tracker.id, None, None)
     best_key: tuple[date, int] | None = None
     for days_back in (1, 0):
         service_date = today - timedelta(days=days_back)
