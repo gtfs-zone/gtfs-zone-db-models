@@ -13,10 +13,15 @@ from railroad_club.models.identity import Identity
 from railroad_club.models.informed_entity import InformedEntity
 from railroad_club.models.service_alert import ServiceAlert
 from railroad_club.models.tracker import Tracker
-from railroad_club.models.tracker_rule import TrackerRule
+from railroad_club.models.tracker_rule import (
+    ExceptionType,
+    TrackerRule,
+    TrackerRuleException,
+)
 from railroad_club.models.user import User
 
 __all__ = [
+    "ExceptionType",
     "Feed",
     "FeedInvite",
     "FeedMember",
@@ -31,5 +36,6 @@ __all__ = [
     "ServiceAlert",
     "Tracker",
     "TrackerRule",
+    "TrackerRuleException",
     "User",
 ]

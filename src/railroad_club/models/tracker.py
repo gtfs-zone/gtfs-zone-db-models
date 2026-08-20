@@ -1,7 +1,9 @@
 from typing import TYPE_CHECKING
+from uuid import uuid4
 
 import petname
 from pydantic import field_validator
+from sqlalchemy import UniqueConstraint
 from sqlmodel import Field, Relationship, SQLModel
 
 if TYPE_CHECKING:
@@ -9,19 +11,33 @@ if TYPE_CHECKING:
     from railroad_club.models.tracker_rule import TrackerRule
 
 
-def generate_tracker_id() -> str:
-    """Return a random pet-name id (e.g. ``gently-tender-oyster``).
+def generate_device_key() -> str:
+    """Return a random pet-name device key (e.g. ``gently-tender-oyster``).
 
-    This id doubles as the Traccar ``uniqueId`` / QR provisioning credential, so
-    it is a secret and must never be exposed in a public GTFS-RT feed.
+    This is the Traccar ``uniqueId`` / QR provisioning credential, so it is a
+    secret and must never be exposed in a public GTFS-RT feed. Pet-name shaped
+    because someone types it into the Traccar client by hand when the QR flow
+    fails.
     """
     return petname.Generate(3, "-")
 
 
+def generate_tracker_id() -> str:
+    """Return a random surrogate primary key. Not a secret."""
+    return uuid4().hex
+
+
 class Tracker(SQLModel, table=True):
-    # ``id`` is the secret device credential (Traccar uniqueId / QR / Redis key).
+    __table_args__ = (UniqueConstraint("feed_id", "nickname"),)
+
+    # A surrogate key, safe to put in a URL, a log line or a Redis key.
     id: str = Field(
-        default_factory=generate_tracker_id, primary_key=True, max_length=64
+        default_factory=generate_tracker_id, primary_key=True, max_length=32
+    )
+    # The secret Traccar credential. Served only by the tracker detail and
+    # provisioning routes.
+    device_key: str = Field(
+        default_factory=generate_device_key, unique=True, index=True, max_length=64
     )
     # ``nickname`` is the public label shown in GTFS-RT feeds.
     nickname: str = Field(max_length=64)
@@ -41,4 +57,5 @@ class Tracker(SQLModel, table=True):
         return self.nickname
 
     def __repr__(self) -> str:
+        # No device_key: this lands in logs and tracebacks.
         return f"Tracker(id={self.id!r}, nickname={self.nickname!r})"
