@@ -30,7 +30,12 @@ if TYPE_CHECKING:
 
 
 class ObjectStoreSettings(BaseSettings):
-    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
+    # extra="ignore" because this owns a slice of an app's .env, not the whole
+    # file. Forbidding extras would make every unrelated key in cafe-car's or
+    # schedule-foamer's .env a ValidationError on the first store call.
+    model_config = SettingsConfigDict(
+        env_file=".env", env_file_encoding="utf-8", extra="ignore"
+    )
 
     # Garage in compose and in k3s; any S3 endpoint elsewhere. Empty means the
     # store is not configured, and ObjectStore refuses to be built rather than
