@@ -26,6 +26,9 @@ DATABASE_URL="postgresql+asyncpg://user:pass@localhost/dbname" alembic upgrade h
 ruff check . --fix
 ruff format .
 
+# Tests (moto stands in for S3; no container needed)
+pytest
+
 # Create a new migration after modifying models
 DATABASE_URL="..." alembic revision --autogenerate -m "description"
 

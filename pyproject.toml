@@ -9,11 +9,14 @@ dependencies = [
     "asyncpg",
     "pydantic-settings>=2.6",
     "petname>=2.9",
+    "boto3>=1.35",
 ]
 
 [dependency-groups]
 dev = [
     "commitizen",
+    "moto[s3]>=5.0",
+    "pytest>=8.0",
     "pre-commit",
     "ruff",
 ]
@@ -37,6 +40,8 @@ select = ["E", "F", "I", "UP", "B", "SIM", "ANN", "TCH", "RUF"]
 
 [tool.ruff.lint.per-file-ignores]
 "src/railroad_club/__init__.py" = ["F401"]
+# Test functions return None and take fixtures; annotating either says nothing.
+"tests/*" = ["ANN001", "ANN201"]
 
 [tool.commitizen]
 name = "cz_conventional_commits"

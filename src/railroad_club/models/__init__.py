@@ -9,6 +9,12 @@ from railroad_club.models.gtfs_static import (
     GtfsTrip,
     LoadStatus,
 )
+from railroad_club.models.gtfs_upload import (
+    FeedSourceKind,
+    GtfsUpload,
+    feed_object_prefix,
+    object_key_for,
+)
 from railroad_club.models.identity import Identity
 from railroad_club.models.informed_entity import InformedEntity
 from railroad_club.models.service_alert import ServiceAlert
@@ -25,11 +31,13 @@ __all__ = [
     "Feed",
     "FeedInvite",
     "FeedMember",
+    "FeedSourceKind",
     "GtfsRoute",
     "GtfsStaticFeed",
     "GtfsStop",
     "GtfsStopTime",
     "GtfsTrip",
+    "GtfsUpload",
     "Identity",
     "InformedEntity",
     "LoadStatus",
@@ -38,4 +46,6 @@ __all__ = [
     "TrackerRule",
     "TrackerRuleException",
     "User",
+    "feed_object_prefix",
+    "object_key_for",
 ]
