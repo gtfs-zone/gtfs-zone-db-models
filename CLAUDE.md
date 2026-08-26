@@ -33,6 +33,16 @@ This is a Python 3.13+ library (no web framework) providing SQLModel ORM models 
 
 **GtfsStopTime rule:** `arrival_time` and `departure_time` must never be null.
 
+**The upload store seam:** `GtfsUpload` (`models/gtfs_upload.py`) is one row
+per uploaded GTFS zip, append-only so a bad upload can be rolled back to a
+prior one. `object_key_for(feed_id, upload_id)` is the only place the bucket
+layout is written down (`feeds/{feed_id}/{upload_id}.zip`); `feed_object_prefix`
+is what a feed delete removes wholesale. `object_store.py`'s `ObjectStore` /
+`AsyncObjectStore` are the shared S3-compatible client (boto3 against Garage's
+S3 API) that both cafe-car and schedule-foamer use to read and write those
+objects — it lives here, beside the models the objects belong to, so neither
+app owns the other's copy.
+
 **Validation approach:** Pydantic field validators on SQLModel classes plus database-level check constraints (e.g. `ck_informed_entity_has_specifier` requires at least one entity specifier field to be set).
 
 **Migrations:** Alembic with async support via `asyncpg`. The `alembic/env.py` imports all models through `railroad_club.models` to enable autogenerate.
