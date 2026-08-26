@@ -1,7 +1,5 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
-
 ## Commands
 
 ```bash
@@ -21,10 +19,6 @@ DATABASE_URL="..." alembic revision --autogenerate -m "description"
 # Commit (enforces conventional commits)
 cz commit
 ```
-
-## Rules
-
-- Never add Co-Authored-By trailers to commit messages.
 
 ## Architecture
 
