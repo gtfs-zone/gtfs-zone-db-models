@@ -9,13 +9,14 @@ writer and a trip instance in another.
 finishes one trip and starts another overwrites its own record instead of
 leaving the old one to live out its TTL beside the new one.
 
-**A tracker id never contains a colon.** It is uuid4 hex
-(``models/tracker.py``), as are the pinned dev ids. That is the invariant the
-whole scheme rests on: it is what lets :func:`split_vehicle_key` split on the
-first colon only and hand back a ``vehicle_id`` that may itself contain colons,
-which Amtrak's ``449:20260921`` does. :func:`vehicle_key` rejects a tracker id
-that breaks it, because a key built from one is silently attributed to the
-wrong tracker on the way back out.
+**A tracker id never contains a colon**, which ``Tracker.validate_id``
+enforces where ids are born. Nothing here re-checks it.
+
+That is what the encoding rests on. Keys are built and split on the *first*
+colon, so exactly one of the two segments may contain colons, and it has to be
+``vehicle_id``: Amtrak's is ``449:20260921``. Were an id to carry one, the
+encoding would stop being injective - ``("a:b", "c")`` and ``("a", "b:c")``
+both give ``a:b:c`` - and two vehicles would share a record.
 """
 
 from __future__ import annotations
@@ -32,8 +33,6 @@ def vehicle_key(tracker_id: str, vehicle_id: str | None) -> str:
     ``vehicle:`` prefix, so the same string addresses a record and a map
     feature.
     """
-    if ":" in tracker_id:
-        raise ValueError(f"tracker id must not contain ':': {tracker_id!r}")
     return f"{tracker_id}:{vehicle_id}" if vehicle_id else tracker_id
 
 
@@ -63,7 +62,5 @@ def trip_update_key(
     two feeds both numbering a trip ``"1"`` would otherwise overwrite each
     other. ``start_date`` separates concurrent instances of one daily trip.
     """
-    if ":" in tracker_id:
-        raise ValueError(f"tracker id must not contain ':': {tracker_id!r}")
     slug = f"{trip_id}:{start_date}" if start_date else trip_id
     return f"{TRIP_UPDATE_PREFIX}{tracker_id}:{slug}"

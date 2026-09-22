@@ -7,8 +7,6 @@ device, which is one vehicle per tracker).
 
 from __future__ import annotations
 
-import pytest
-
 from railroad_club.vehicle_keys import (
     redis_key,
     split_vehicle_key,
@@ -47,13 +45,6 @@ def test_split_accepts_an_unprefixed_key():
 
 def test_split_of_a_bare_tracker_key_gives_no_vehicle_id():
     assert split_vehicle_key(f"vehicle:{TRACKER}") == (TRACKER, None)
-
-
-def test_a_colon_in_the_tracker_id_is_refused():
-    with pytest.raises(ValueError, match="must not contain"):
-        vehicle_key("bad:id", "bus-12")
-    with pytest.raises(ValueError, match="must not contain"):
-        trip_update_key("bad:id", "trip-1")
 
 
 def test_trip_update_key_is_scoped_by_tracker():
