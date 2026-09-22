@@ -5,17 +5,13 @@ Revises: 457fca1b3d51, 77c39735aa6a
 Create Date: 2026-05-03 17:25:38.278552
 
 """
-from typing import Sequence, Union
-
-from alembic import op
-import sqlalchemy as sa
-
+from collections.abc import Sequence
 
 # revision identifiers, used by Alembic.
 revision: str = 'f9af1255b125'
-down_revision: Union[str, Sequence[str], None] = ('457fca1b3d51', '77c39735aa6a')
-branch_labels: Union[str, Sequence[str], None] = None
-depends_on: Union[str, Sequence[str], None] = None
+down_revision: str | Sequence[str] | None = ('457fca1b3d51', '77c39735aa6a')
+branch_labels: str | Sequence[str] | None = None
+depends_on: str | Sequence[str] | None = None
 
 
 def upgrade() -> None:

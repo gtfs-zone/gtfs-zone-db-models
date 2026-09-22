@@ -47,4 +47,8 @@ app owns the other's copy.
 
 **Migrations:** Alembic with async support via `asyncpg`. The `alembic/env.py` imports all models through `railroad_club.models` to enable autogenerate.
 
-**Tooling:** Ruff (lint + format, line length 88, rules E/F/I/UP/B/SIM), Commitizen (conventional commits, tag format `v$version`), pre-commit hooks enforcing both.
+**Tooling:** Ruff (lint, line length 88, rules E/F/I/UP/B/SIM/ANN/TC/RUF), Commitizen (conventional commits, tag format `v$version`), pre-commit hooks enforcing both.
+
+## Rules
+
+- Module loggers are named `log`, never `logger`: `log = logging.getLogger(__name__)`

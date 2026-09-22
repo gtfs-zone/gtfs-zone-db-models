@@ -36,12 +36,14 @@ target-version = "py313"
 line-length = 88
 
 [tool.ruff.lint]
-select = ["E", "F", "I", "UP", "B", "SIM", "ANN", "TCH", "RUF"]
+select = ["E", "F", "I", "UP", "B", "SIM", "ANN", "TC", "RUF"]
 
 [tool.ruff.lint.per-file-ignores]
 "src/railroad_club/__init__.py" = ["F401"]
 # Test functions return None and take fixtures; annotating either says nothing.
-"tests/*" = ["ANN001", "ANN201"]
+"tests/**" = ["ANN"]
+# Alembic generates these; the long op.* calls are its formatting, not ours.
+"src/railroad_club/alembic/**" = ["E501", "ANN"]
 
 [tool.commitizen]
 name = "cz_conventional_commits"

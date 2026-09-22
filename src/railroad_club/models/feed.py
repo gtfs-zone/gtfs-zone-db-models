@@ -79,7 +79,7 @@ class Feed(SQLModel, table=True):
         if not _FEED_NAME_RE.match(v):
             raise ValueError(
                 "feed_name must start with a lowercase letter and contain only "
-                "lowercase letters, digits, underscores, and hyphens (3–64 chars)"
+                "lowercase letters, digits, underscores, and hyphens (3-64 chars)"
             )
         return v
 

@@ -72,7 +72,9 @@ class GtfsTrip(SQLModel, table=True):
 
 class GtfsStopTime(SQLModel, table=True):
     __tablename__ = "gtfs_stop_time"
-    __table_args__ = (Index("ix_gtfs_stop_time_gsf_trip", "gtfs_static_feed_id", "trip_id"),)
+    __table_args__ = (
+        Index("ix_gtfs_stop_time_gsf_trip", "gtfs_static_feed_id", "trip_id"),
+    )
 
     id: int | None = Field(default=None, primary_key=True)
     gtfs_static_feed_id: int = Field(foreign_key="gtfs_static_feed.id")
