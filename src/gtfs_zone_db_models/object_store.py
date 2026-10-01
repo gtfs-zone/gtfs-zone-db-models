@@ -184,10 +184,6 @@ class AsyncObjectStore:
     def __init__(self, store: ObjectStore) -> None:
         self._store = store
 
-    @property
-    def sync(self) -> ObjectStore:
-        return self._store
-
     async def put(
         self, key: str, body: bytes, *, content_type: str = "application/zip"
     ) -> None:

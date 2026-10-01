@@ -25,8 +25,6 @@ from gtfs_zone_db_models.models.tracker_rule import (
     TrackerRuleException,
 )
 
-SECONDS_PER_DAY = 86400
-
 _WEEKDAY_COLS = [
     "monday",
     "tuesday",
