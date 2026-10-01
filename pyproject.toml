@@ -1,6 +1,6 @@
 [project]
 name = "gtfs-zone-db-models"
-version = "0.2.0"
+version = "0.2.1"
 requires-python = ">=3.13"
 description = "SQLModel ORM models and Alembic migrations for GTFS transit feed management"
 license = "AGPL-3.0-or-later"
