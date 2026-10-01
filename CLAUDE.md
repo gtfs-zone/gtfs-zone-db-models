@@ -39,7 +39,7 @@ prior one. `object_key_for(feed_id, upload_id)` is the only place the bucket
 layout is written down (`feeds/{feed_id}/{upload_id}.zip`); `feed_object_prefix`
 is what a feed delete removes wholesale. `object_store.py`'s `ObjectStore` /
 `AsyncObjectStore` are the shared S3-compatible client (boto3 against Garage's
-S3 API) that both cafe-car and schedule-foamer use to read and write those
+S3 API) that both rt-api and static-importer use to read and write those
 objects — it lives here, beside the models the objects belong to, so neither
 app owns the other's copy.
 
