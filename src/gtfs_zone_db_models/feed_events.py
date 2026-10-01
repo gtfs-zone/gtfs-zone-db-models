@@ -1,16 +1,17 @@
 """The per-feed event channel, named once so three repos agree on it.
 
-schedule-foamer publishes; cafe-car subscribes and forwards each payload to
-yard-master over SSE. Nothing here opens a Redis connection: every repo already
-has its own client and its own settings, and what has to be shared is the
-channel name and the payload shape, not the transport.
+gtfs-zone-static-importer publishes; gtfs-zone-rt-api subscribes and forwards
+each payload to gtfs-zone-rt-manager over SSE. Nothing here opens a Redis
+connection: every repo already has its own client and its own settings, and
+what has to be shared is the channel name and the payload shape, not the
+transport.
 
 Redis pub/sub is global rather than scoped to a database number, so a publisher
-on the Celery broker's db and a subscriber on cafe-car's would reach each other
-even when the two disagree. They are pointed at the same db anyway, because
+on the Celery broker's db and a subscriber on gtfs-zone-rt-api's would reach
+each other even when the two disagree. They are pointed at the same db anyway, because
 depending on that is the kind of thing nobody remembers a year later.
 
-Every payload is a JSON object with a ``type``. cafe-car forwards the bytes
+Every payload is a JSON object with a ``type``. gtfs-zone-rt-api forwards the bytes
 without parsing them, so adding an event type is a publisher change and a
 client change with no server change in between. A payload must therefore be
 JSON with no literal newline in it, which ``json.dumps`` guarantees and which
@@ -33,7 +34,7 @@ EVENT_LOAD = "load"
 
 # One vehicle's current fix. Payload: ``{"type": "position", "vehicle": {...}}``
 # where ``vehicle`` is already in the camelCase GTFS-RT shape the map reads, so
-# a client stores it without a translation layer. The builder lives in cafe-car
+# a client stores it without a translation layer. The builder lives in gtfs-zone-rt-api
 # next to the ``vehicle:*`` record it is built from.
 EVENT_POSITION = "position"
 
@@ -48,7 +49,7 @@ def _iso(value: datetime | None) -> str | None:
 
 
 def load_event(static: GtfsStaticFeed | None) -> dict[str, Any]:
-    """A ``load`` payload, mirroring cafe-car's ``LoadStatusOut``.
+    """A ``load`` payload, mirroring gtfs-zone-rt-api's ``LoadStatusOut``.
 
     Built from the row rather than from the task's local variables so what is
     pushed is what a later ``GET /api/feeds/{id}`` would answer. ``None`` is a

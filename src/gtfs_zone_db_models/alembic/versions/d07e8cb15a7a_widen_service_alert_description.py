@@ -1,6 +1,6 @@
 """widen service_alert.description_text to unbounded text
 
-Amtrak's alerts-page scrape (hell-gate-bridge) includes the full detail-page
+Amtrak's alerts-page scrape (gtfs-zone-rt-pollers) includes the full detail-page
 body in the description, which routinely exceeds the 2048-char varchar cap
 and 500s the whole /ingest/alerts batch (all-or-nothing insert). Nothing else
 depends on the description having a bounded length, so drop the cap instead

@@ -1,8 +1,9 @@
-"""S3-compatible object storage, shared by cafe-car and schedule-foamer.
+"""S3-compatible object storage, shared by rt-api and static-importer.
 
-Both apps need the identical client: cafe-car writes an uploaded GTFS zip and
-serves it back, schedule-foamer reads it to load the schedule. Neither should
-own the other's copy, so it lives here beside the models the objects belong to.
+Both apps need the identical client: gtfs-zone-rt-api writes an uploaded GTFS
+zip and serves it back, gtfs-zone-static-importer reads it to load the
+schedule. Neither should own the other's copy, so it lives here beside the
+models the objects belong to.
 
 Written against the S3 API rather than Garage's own, which is what the local
 and deployed stacks run. A self-hoster who would rather point at AWS, R2 or B2
@@ -31,8 +32,8 @@ if TYPE_CHECKING:
 
 class ObjectStoreSettings(BaseSettings):
     # extra="ignore" because this owns a slice of an app's .env, not the whole
-    # file. Forbidding extras would make every unrelated key in cafe-car's or
-    # schedule-foamer's .env a ValidationError on the first store call.
+    # file. Forbidding extras would make every unrelated key in gtfs-zone-rt-api's or
+    # gtfs-zone-static-importer's .env a ValidationError on the first store call.
     model_config = SettingsConfigDict(
         env_file=".env", env_file_encoding="utf-8", extra="ignore"
     )
@@ -175,7 +176,7 @@ class ObjectStore:
 class AsyncObjectStore:
     """``ObjectStore`` with every call on a worker thread.
 
-    boto3 has no async client, and cafe-car's request handlers are coroutines.
+    boto3 has no async client, and gtfs-zone-rt-api's request handlers are coroutines.
     A blocking put of a 30 MB zip on the event loop would stall every other
     request in flight, which is the whole reason this wrapper exists.
     """
