@@ -90,12 +90,8 @@ def upgrade() -> None:
         sa.Column("feed_id", sa.Integer(), nullable=False),
         sa.Column("trip_id", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
         sa.Column("stop_id", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
-        sa.Column(
-            "arrival_time", sqlmodel.sql.sqltypes.AutoString(), nullable=False
-        ),
-        sa.Column(
-            "departure_time", sqlmodel.sql.sqltypes.AutoString(), nullable=False
-        ),
+        sa.Column("arrival_time", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
+        sa.Column("departure_time", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
         sa.Column("stop_sequence", sa.Integer(), nullable=False),
         sa.ForeignKeyConstraint(["feed_id"], ["feed.id"]),
         sa.PrimaryKeyConstraint("id"),

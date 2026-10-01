@@ -80,8 +80,12 @@ def upgrade() -> None:
         sa.Column("gtfs_static_feed_id", sa.Integer(), nullable=False),
         sa.Column("route_id", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
         sa.Column("agency_id", sqlmodel.sql.sqltypes.AutoString(), nullable=True),
-        sa.Column("route_short_name", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
-        sa.Column("route_long_name", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
+        sa.Column(
+            "route_short_name", sqlmodel.sql.sqltypes.AutoString(), nullable=False
+        ),
+        sa.Column(
+            "route_long_name", sqlmodel.sql.sqltypes.AutoString(), nullable=False
+        ),
         sa.Column("route_type", sa.Integer(), nullable=False),
         sa.ForeignKeyConstraint(["gtfs_static_feed_id"], ["gtfs_static_feed.id"]),
         sa.PrimaryKeyConstraint("id"),
@@ -176,8 +180,12 @@ def downgrade() -> None:
         sa.Column("feed_id", sa.Integer(), nullable=False),
         sa.Column("route_id", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
         sa.Column("agency_id", sqlmodel.sql.sqltypes.AutoString(), nullable=True),
-        sa.Column("route_short_name", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
-        sa.Column("route_long_name", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
+        sa.Column(
+            "route_short_name", sqlmodel.sql.sqltypes.AutoString(), nullable=False
+        ),
+        sa.Column(
+            "route_long_name", sqlmodel.sql.sqltypes.AutoString(), nullable=False
+        ),
         sa.Column("route_type", sa.Integer(), nullable=False),
         sa.ForeignKeyConstraint(["feed_id"], ["feed.id"]),
         sa.PrimaryKeyConstraint("id"),

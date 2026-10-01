@@ -75,9 +75,11 @@ def upgrade() -> None:
 def downgrade() -> None:
     # A hosted feed has no URL to put back, so it would violate the NOT NULL.
     # Refusing is better than inventing one or dropping the feed.
-    hosted = op.get_bind().execute(
-        sa.text("SELECT count(*) FROM feed WHERE source_kind = 'hosted'")
-    ).scalar_one()
+    hosted = (
+        op.get_bind()
+        .execute(sa.text("SELECT count(*) FROM feed WHERE source_kind = 'hosted'"))
+        .scalar_one()
+    )
     if hosted:
         raise RuntimeError(
             f"{hosted} feed(s) are hosted and have no static_feed_url; "

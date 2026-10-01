@@ -74,12 +74,8 @@ def downgrade() -> None:
     op.create_table(
         "driver",
         sa.Column("id", sa.Integer(), nullable=False),
-        sa.Column(
-            "username", sqlmodel.sql.sqltypes.AutoString(), nullable=False
-        ),
-        sa.Column(
-            "password", sqlmodel.sql.sqltypes.AutoString(), nullable=False
-        ),
+        sa.Column("username", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
+        sa.Column("password", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
         sa.Column("feed_id", sa.Integer(), nullable=False),
         sa.ForeignKeyConstraint(["feed_id"], ["feed.id"]),
         sa.PrimaryKeyConstraint("id"),
