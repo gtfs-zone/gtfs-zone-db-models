@@ -5,16 +5,16 @@ from pydantic import AnyHttpUrl, TypeAdapter, field_validator
 from sqlalchemy import Column, ForeignKey, String
 from sqlmodel import Field, Relationship, SQLModel
 
-from railroad_club.models.gtfs_upload import FeedSourceKind
+from gtfs_zone_db_models.models.gtfs_upload import FeedSourceKind
 
 if TYPE_CHECKING:
-    from railroad_club.models.feed_invite import FeedInvite
-    from railroad_club.models.feed_member import FeedMember
-    from railroad_club.models.gtfs_static import GtfsStaticFeed
-    from railroad_club.models.gtfs_upload import GtfsUpload
-    from railroad_club.models.service_alert import ServiceAlert
-    from railroad_club.models.tracker import Tracker
-    from railroad_club.models.user import User
+    from gtfs_zone_db_models.models.feed_invite import FeedInvite
+    from gtfs_zone_db_models.models.feed_member import FeedMember
+    from gtfs_zone_db_models.models.gtfs_static import GtfsStaticFeed
+    from gtfs_zone_db_models.models.gtfs_upload import GtfsUpload
+    from gtfs_zone_db_models.models.service_alert import ServiceAlert
+    from gtfs_zone_db_models.models.tracker import Tracker
+    from gtfs_zone_db_models.models.user import User
 
 _url_validator = TypeAdapter(AnyHttpUrl)
 

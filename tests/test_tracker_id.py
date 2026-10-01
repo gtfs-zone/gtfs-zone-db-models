@@ -1,6 +1,6 @@
 """``Tracker.id`` is the one place the colon-free rule is enforced.
 
-``railroad_club.vehicle_keys`` builds and splits Redis keys on the first colon
+``gtfs_zone_db_models.vehicle_keys`` builds and splits Redis keys on the first colon
 and does not re-check the id, so this validator is what makes that safe.
 """
 
@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import pytest
 
-from railroad_club.models.tracker import Tracker, generate_tracker_id
+from gtfs_zone_db_models.models.tracker import Tracker, generate_tracker_id
 
 
 def test_a_generated_id_is_colon_free():

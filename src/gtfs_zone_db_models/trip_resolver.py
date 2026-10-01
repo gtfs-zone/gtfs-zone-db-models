@@ -16,10 +16,10 @@ from zoneinfo import ZoneInfo
 
 from sqlmodel import Session, select
 
-from railroad_club.models.feed import Feed
-from railroad_club.models.gtfs_static import GtfsStaticFeed
-from railroad_club.models.tracker import Tracker
-from railroad_club.models.tracker_rule import (
+from gtfs_zone_db_models.models.feed import Feed
+from gtfs_zone_db_models.models.gtfs_static import GtfsStaticFeed
+from gtfs_zone_db_models.models.tracker import Tracker
+from gtfs_zone_db_models.models.tracker_rule import (
     ExceptionType,
     TrackerRule,
     TrackerRuleException,

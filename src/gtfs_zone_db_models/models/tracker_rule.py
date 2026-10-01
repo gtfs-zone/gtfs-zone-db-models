@@ -6,7 +6,7 @@ from sqlalchemy import UniqueConstraint
 from sqlmodel import Field, Relationship, SQLModel
 
 if TYPE_CHECKING:
-    from railroad_club.models.tracker import Tracker
+    from gtfs_zone_db_models.models.tracker import Tracker
 
 
 class ExceptionType(StrEnum):

@@ -7,7 +7,7 @@ from sqlalchemy import Column, DateTime, ForeignKey, Integer
 from sqlmodel import Field, Relationship, SQLModel
 
 if TYPE_CHECKING:
-    from railroad_club.models.feed import Feed
+    from gtfs_zone_db_models.models.feed import Feed
 
 
 class FeedSourceKind(StrEnum):

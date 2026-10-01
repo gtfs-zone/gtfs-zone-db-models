@@ -5,7 +5,7 @@ from sqlalchemy import CheckConstraint
 from sqlmodel import Field, Relationship, SQLModel
 
 if TYPE_CHECKING:
-    from railroad_club.models.service_alert import ServiceAlert
+    from gtfs_zone_db_models.models.service_alert import ServiceAlert
 
 
 class InformedEntity(SQLModel, table=True):

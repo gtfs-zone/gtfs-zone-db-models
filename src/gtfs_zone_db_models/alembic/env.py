@@ -7,7 +7,7 @@ from sqlalchemy.pool import NullPool
 from sqlmodel import SQLModel
 
 # Import all models so SQLModel.metadata is populated
-import railroad_club.models  # noqa: F401
+import gtfs_zone_db_models.models  # noqa: F401
 
 config = context.config
 if config.config_file_name is not None:

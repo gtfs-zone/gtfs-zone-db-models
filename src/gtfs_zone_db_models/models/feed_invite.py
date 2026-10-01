@@ -6,7 +6,7 @@ from sqlalchemy import Column, DateTime
 from sqlmodel import Field, Relationship, SQLModel
 
 if TYPE_CHECKING:
-    from railroad_club.models.feed import Feed
+    from gtfs_zone_db_models.models.feed import Feed
 
 
 def _utcnow() -> datetime:

@@ -11,7 +11,7 @@ import boto3
 import pytest
 from moto import mock_aws
 
-from railroad_club.object_store import (
+from gtfs_zone_db_models.object_store import (
     ObjectNotFound,
     ObjectStore,
     ObjectStoreError,

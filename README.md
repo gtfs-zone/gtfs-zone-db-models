@@ -1,4 +1,4 @@
-# railroad-club
+# gtfs-zone-db-models
 
 SQLModel ORM models and Alembic migrations for a GTFS transit feed management system.
 

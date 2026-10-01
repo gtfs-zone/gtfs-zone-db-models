@@ -7,8 +7,8 @@ from sqlalchemy.orm import validates
 from sqlmodel import Field, Relationship, SQLModel
 
 if TYPE_CHECKING:
-    from railroad_club.models.feed import Feed
-    from railroad_club.models.tracker_rule import TrackerRule
+    from gtfs_zone_db_models.models.feed import Feed
+    from gtfs_zone_db_models.models.tracker_rule import TrackerRule
 
 
 def generate_device_key() -> str:
@@ -62,7 +62,7 @@ class Tracker(SQLModel, table=True):
         a colon in the id makes that encoding ambiguous: ``("a:b", "c")`` and
         ``("a", "b:c")`` collide on one key and two vehicles share a record.
         This is the only place the rule is enforced - ids are born here or not
-        at all - so ``railroad_club.vehicle_keys`` may assume it.
+        at all - so ``gtfs_zone_db_models.vehicle_keys`` may assume it.
         """
         if ":" in value:
             raise ValueError("tracker id must not contain ':'")

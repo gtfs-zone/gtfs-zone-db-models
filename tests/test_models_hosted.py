@@ -5,7 +5,7 @@ from __future__ import annotations
 import pytest
 from pydantic import ValidationError
 
-from railroad_club.models import (
+from gtfs_zone_db_models.models import (
     Feed,
     FeedSourceKind,
     GtfsUpload,

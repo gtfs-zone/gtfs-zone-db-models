@@ -22,7 +22,7 @@ cz commit
 
 ## Architecture
 
-This is a Python 3.13+ library (no web framework) providing SQLModel ORM models and Alembic migrations for a GTFS transit feed management system. The package lives in `src/railroad_club/`.
+This is a Python 3.13+ library (no web framework) providing SQLModel ORM models and Alembic migrations for a GTFS transit feed management system. The package lives in `src/gtfs_zone_db_models/`.
 
 **Key entities and relationships:**
 - `User`: provider-based OAuth identity (provider + provider_subject unique pair, e.g. "dex")
@@ -45,7 +45,7 @@ app owns the other's copy.
 
 **Validation approach:** Pydantic field validators on SQLModel classes plus database-level check constraints (e.g. `ck_informed_entity_has_specifier` requires at least one entity specifier field to be set).
 
-**Migrations:** Alembic with async support via `asyncpg`. The `alembic/env.py` imports all models through `railroad_club.models` to enable autogenerate.
+**Migrations:** Alembic with async support via `asyncpg`. The `alembic/env.py` imports all models through `gtfs_zone_db_models.models` to enable autogenerate.
 
 **Tooling:** Ruff (lint, line length 88, rules E/F/I/UP/B/SIM/ANN/TC/RUF), Commitizen (conventional commits, tag format `v$version`), pre-commit hooks enforcing both.
 

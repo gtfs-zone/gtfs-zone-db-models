@@ -5,8 +5,8 @@ from sqlalchemy import Column, DateTime, UniqueConstraint
 from sqlmodel import Field, Relationship, SQLModel
 
 if TYPE_CHECKING:
-    from railroad_club.models.feed import Feed
-    from railroad_club.models.user import User
+    from gtfs_zone_db_models.models.feed import Feed
+    from gtfs_zone_db_models.models.user import User
 
 
 def _utcnow() -> datetime:

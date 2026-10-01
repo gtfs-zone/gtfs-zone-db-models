@@ -7,7 +7,7 @@ device, which is one vehicle per tracker).
 
 from __future__ import annotations
 
-from railroad_club.vehicle_keys import (
+from gtfs_zone_db_models.vehicle_keys import (
     redis_key,
     split_vehicle_key,
     trip_update_key,

@@ -24,7 +24,7 @@ from typing import TYPE_CHECKING, Any
 if TYPE_CHECKING:
     from datetime import datetime
 
-    from railroad_club.models.gtfs_static import GtfsStaticFeed
+    from gtfs_zone_db_models.models.gtfs_static import GtfsStaticFeed
 
 # Where a feed's static load got to. Payload: ``{"type": "load", "load": {...}}``
 # with ``load`` null for a feed the loader has never touched, which is not the
