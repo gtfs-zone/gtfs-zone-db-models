@@ -1,3 +1,13 @@
+## v0.3.0 (2026-11-05)
+
+### Feat
+
+- **object-store**: obstore instead of boto3, with an injectable store for tests
+
+### Fix
+
+- **deps**: upgrade packages with published security advisories
+
 ## v0.2.1 (2026-10-01)
 
 ## v0.2.0 (2026-10-01)
