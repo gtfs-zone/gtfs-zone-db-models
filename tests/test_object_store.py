@@ -1,17 +1,19 @@
-"""ObjectStore against moto's in-process S3.
+"""ObjectStore against obstore's in-memory store.
 
 Not a Garage container: the point of writing to the S3 API rather than Garage's
-own is that any S3 implementation answers the same, so a fake that speaks S3 is
-a fair test of this wrapper. Garage's own behaviour is the deploy's problem.
+own is that any S3 implementation answers the same, so an in-memory store is a
+fair test of this wrapper. Garage's own behaviour is the deploy's problem.
 """
 
 from __future__ import annotations
 
-import boto3
+import asyncio
+
 import pytest
-from moto import mock_aws
+from obstore.store import MemoryStore
 
 from gtfs_zone_db_models.object_store import (
+    AsyncObjectStore,
     ObjectNotFound,
     ObjectStore,
     ObjectStoreError,
@@ -21,27 +23,9 @@ from gtfs_zone_db_models.object_store import (
 BUCKET = "test-feeds"
 
 
-ENDPOINT = "http://s3.local"
-
-
 @pytest.fixture
-def store(monkeypatch):
-    # moto matches requests by URL, and only recognises AWS hostnames unless
-    # told otherwise. The endpoint is deliberately not an AWS one: this wrapper
-    # points at Garage, and a test against s3.amazonaws.com would not exercise
-    # the path addressing that requires.
-    monkeypatch.setenv("MOTO_S3_CUSTOM_ENDPOINTS", ENDPOINT)
-    with mock_aws():
-        boto3.client("s3", region_name="us-east-1").create_bucket(Bucket=BUCKET)
-        yield ObjectStore(
-            ObjectStoreSettings(
-                s3_endpoint=ENDPOINT,
-                s3_bucket=BUCKET,
-                s3_access_key="key",
-                s3_secret_key="secret",
-                s3_region="us-east-1",
-            )
-        )
+def store():
+    return ObjectStore(ObjectStoreSettings(s3_bucket=BUCKET), store=MemoryStore())
 
 
 def test_unconfigured_endpoint_refuses_to_build():
@@ -90,3 +74,31 @@ def test_delete_prefix_takes_one_feed_and_leaves_the_others(store):
 
 def test_delete_prefix_of_nothing_is_not_an_error(store):
     assert store.delete_prefix("feeds/999/") == 0
+
+
+def test_s3_store_builds_from_settings():
+    store = ObjectStore(
+        ObjectStoreSettings(s3_endpoint="http://garage:3900", s3_bucket=BUCKET)
+    )
+    assert store.bucket == BUCKET
+
+
+def test_async_store_matches_the_sync_one(store):
+    async_store = AsyncObjectStore(store)
+
+    async def run():
+        await async_store.put("feeds/1/a.zip", b"abc")
+        await async_store.put("feeds/1/b.zip", b"d")
+        assert await async_store.get("feeds/1/a.zip") == b"abc"
+        assert (await async_store.stat("feeds/1/a.zip")).size_bytes == 3
+        assert await async_store.list_prefix("feeds/1/") == [
+            "feeds/1/a.zip",
+            "feeds/1/b.zip",
+        ]
+        await async_store.delete("feeds/1/a.zip")
+        await async_store.delete("feeds/1/a.zip")
+        with pytest.raises(ObjectNotFound):
+            await async_store.stat("feeds/1/a.zip")
+        assert await async_store.delete_prefix("feeds/1/") == 1
+
+    asyncio.run(run())

@@ -23,7 +23,7 @@ script (rt-api's migrate job), never from the consumers.
 - `GtfsUpload` is append-only, one row per uploaded zip, so a bad upload can be
   rolled back. `object_key_for` is the only place the bucket layout
   (`feeds/{feed_id}/{upload_id}.zip`) is written down.
-- `object_store.py` is the one S3 client (boto3 against Garage) for rt-api and
+- `object_store.py` is the one S3 client (obstore against Garage) for rt-api and
   static-importer. It lives here so neither app owns the other's copy.
 
 ## Conventions

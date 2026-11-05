@@ -9,25 +9,28 @@ Written against the S3 API rather than Garage's own, which is what the local
 and deployed stacks run. A self-hoster who would rather point at AWS, R2 or B2
 changes ``S3_ENDPOINT`` and nothing else.
 
-boto3 is synchronous. Celery tasks call these methods directly; async callers
-use ``AsyncObjectStore``, which is the same client with every call moved onto a
-worker thread so it cannot block an event loop.
+Built on obstore. Celery tasks call ``ObjectStore`` directly; async callers use
+``AsyncObjectStore``, which makes the same calls through obstore's native async
+API so they cannot block an event loop.
 """
 
 from __future__ import annotations
 
-import asyncio
 from functools import lru_cache
 from typing import TYPE_CHECKING, NamedTuple
 
-import boto3
-from botocore.config import Config
-from botocore.exceptions import ClientError
+import obstore
+from obstore.exceptions import BaseError
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 if TYPE_CHECKING:
-    from collections.abc import Iterator
     from datetime import datetime
+
+    from obstore.store import ObjectStore as Store
+
+# Errors a store call can raise besides FileNotFoundError: obstore's own, and
+# OSError for transport failures.
+_STORE_ERRORS = (BaseError, OSError)
 
 
 class ObjectStoreSettings(BaseSettings):
@@ -67,70 +70,100 @@ class ObjectNotFound(ObjectStoreError):
     """No object at that key."""
 
 
-class ObjectStore:
-    """put / get / delete / delete_prefix / stat against one bucket."""
+def s3_store(settings: ObjectStoreSettings) -> Store:
+    """An obstore S3Store for the settings' bucket."""
+    from obstore.store import S3Store
 
-    def __init__(self, settings: ObjectStoreSettings) -> None:
-        if not settings.s3_endpoint:
+    return S3Store(
+        settings.s3_bucket,
+        endpoint=settings.s3_endpoint,
+        region=settings.s3_region,
+        access_key_id=settings.s3_access_key,
+        secret_access_key=settings.s3_secret_key,
+        # Garage serves one host for every bucket, so the bucket has to be in
+        # the path. Virtual-host addressing would resolve `gtfs-feeds.garage`
+        # and fail to connect.
+        virtual_hosted_style_request=False,
+        client_options={
+            "allow_http": settings.s3_endpoint.startswith("http://"),
+            "timeout": "120s",
+        },
+    )
+
+
+def _stat(key: str, meta: dict) -> ObjectStat:
+    return ObjectStat(
+        key=key,
+        size_bytes=int(meta["size"]),
+        last_modified=meta["last_modified"],
+        etag=str(meta.get("e_tag") or "").strip('"'),
+    )
+
+
+class ObjectStore:
+    """put / get / delete / delete_prefix / stat against one bucket.
+
+    ``store`` replaces the S3 client, e.g. with obstore's ``MemoryStore`` in
+    tests.
+    """
+
+    def __init__(
+        self, settings: ObjectStoreSettings, store: Store | None = None
+    ) -> None:
+        if store is None and not settings.s3_endpoint:
             raise ObjectStoreError(
                 "S3_ENDPOINT is not set; object storage is unconfigured"
             )
         self._bucket = settings.s3_bucket
-        self._client = boto3.client(
-            "s3",
-            endpoint_url=settings.s3_endpoint,
-            aws_access_key_id=settings.s3_access_key,
-            aws_secret_access_key=settings.s3_secret_key,
-            region_name=settings.s3_region,
-            # Garage serves one host for every bucket, so the bucket has to be
-            # in the path. Virtual-host addressing would resolve
-            # `gtfs-feeds.garage` and fail to connect.
-            config=Config(s3={"addressing_style": "path"}, retries={"max_attempts": 3}),
-        )
+        self._store = store if store is not None else s3_store(settings)
 
     @property
     def bucket(self) -> str:
         return self._bucket
 
+    @property
+    def store(self) -> Store:
+        return self._store
+
     def put(
         self, key: str, body: bytes, *, content_type: str = "application/zip"
     ) -> None:
         try:
-            self._client.put_object(
-                Bucket=self._bucket, Key=key, Body=body, ContentType=content_type
+            # One PUT keeps the ETag an md5 of the body.
+            obstore.put(
+                self._store,
+                key,
+                body,
+                use_multipart=False,
+                attributes={"Content-Type": content_type},
             )
-        except ClientError as exc:
+        except _STORE_ERRORS as exc:
             raise ObjectStoreError(f"put {key!r} failed: {exc}") from exc
 
     def get(self, key: str) -> bytes:
         try:
-            response = self._client.get_object(Bucket=self._bucket, Key=key)
-        except ClientError as exc:
-            if _is_missing(exc):
-                raise ObjectNotFound(key) from exc
+            return bytes(obstore.get(self._store, key).bytes())
+        except FileNotFoundError as exc:
+            raise ObjectNotFound(key) from exc
+        except _STORE_ERRORS as exc:
             raise ObjectStoreError(f"get {key!r} failed: {exc}") from exc
-        with response["Body"] as stream:
-            return stream.read()
 
     def stat(self, key: str) -> ObjectStat:
         try:
-            response = self._client.head_object(Bucket=self._bucket, Key=key)
-        except ClientError as exc:
-            if _is_missing(exc):
-                raise ObjectNotFound(key) from exc
+            meta = obstore.head(self._store, key)
+        except FileNotFoundError as exc:
+            raise ObjectNotFound(key) from exc
+        except _STORE_ERRORS as exc:
             raise ObjectStoreError(f"stat {key!r} failed: {exc}") from exc
-        return ObjectStat(
-            key=key,
-            size_bytes=int(response["ContentLength"]),
-            last_modified=response["LastModified"],
-            etag=str(response["ETag"]).strip('"'),
-        )
+        return _stat(key, meta)
 
     def delete(self, key: str) -> None:
         """Remove an object. Deleting a key that is not there is not an error."""
         try:
-            self._client.delete_object(Bucket=self._bucket, Key=key)
-        except ClientError as exc:
+            obstore.delete(self._store, key)
+        except FileNotFoundError:
+            pass
+        except _STORE_ERRORS as exc:
             raise ObjectStoreError(f"delete {key!r} failed: {exc}") from exc
 
     def delete_prefix(self, prefix: str) -> int:
@@ -139,82 +172,101 @@ class ObjectStore:
         This is what a feed delete calls. A prefix that matches nothing is a
         no-op, so a feed that never had an upload deletes cleanly.
         """
-        deleted = 0
-        # delete_objects takes 1000 keys at a time, and the listing is paged
-        # anyway, so the batch is one page.
-        for page in self._pages(prefix):
-            keys = [{"Key": item["Key"]} for item in page.get("Contents", [])]
-            if not keys:
-                continue
-            try:
-                self._client.delete_objects(
-                    Bucket=self._bucket, Delete={"Objects": keys, "Quiet": True}
-                )
-            except ClientError as exc:
-                raise ObjectStoreError(
-                    f"delete_prefix {prefix!r} failed: {exc}"
-                ) from exc
-            deleted += len(keys)
-        return deleted
+        keys = self.list_prefix(prefix)
+        if not keys:
+            return 0
+        try:
+            # obstore sends S3 bulk deletes of up to 1000 keys each.
+            obstore.delete(self._store, keys)
+        except FileNotFoundError:
+            pass
+        except _STORE_ERRORS as exc:
+            raise ObjectStoreError(f"delete_prefix {prefix!r} failed: {exc}") from exc
+        return len(keys)
 
     def list_prefix(self, prefix: str) -> list[str]:
         """Every key under a prefix. For checking what a feed is actually holding."""
-        return [
-            item["Key"]
-            for page in self._pages(prefix)
-            for item in page.get("Contents", [])
-        ]
-
-    def _pages(self, prefix: str) -> Iterator[dict]:
-        paginator = self._client.get_paginator("list_objects_v2")
         try:
-            yield from paginator.paginate(Bucket=self._bucket, Prefix=prefix)
-        except ClientError as exc:
+            return [
+                meta["path"]
+                for batch in obstore.list(self._store, prefix=prefix)
+                for meta in batch
+            ]
+        except _STORE_ERRORS as exc:
             raise ObjectStoreError(f"list {prefix!r} failed: {exc}") from exc
 
 
 class AsyncObjectStore:
-    """``ObjectStore`` with every call on a worker thread.
+    """``ObjectStore`` over obstore's async calls.
 
-    boto3 has no async client, and gtfs-zone-rt-api's request handlers are coroutines.
-    A blocking put of a 30 MB zip on the event loop would stall every other
-    request in flight, which is the whole reason this wrapper exists.
+    gtfs-zone-rt-api's request handlers are coroutines, and a blocking put of a
+    30 MB zip on the event loop would stall every other request in flight.
     """
 
     def __init__(self, store: ObjectStore) -> None:
-        self._store = store
+        self._store = store.store
 
     async def put(
         self, key: str, body: bytes, *, content_type: str = "application/zip"
     ) -> None:
-        await asyncio.to_thread(self._store.put, key, body, content_type=content_type)
+        try:
+            await obstore.put_async(
+                self._store,
+                key,
+                body,
+                use_multipart=False,
+                attributes={"Content-Type": content_type},
+            )
+        except _STORE_ERRORS as exc:
+            raise ObjectStoreError(f"put {key!r} failed: {exc}") from exc
 
     async def get(self, key: str) -> bytes:
-        return await asyncio.to_thread(self._store.get, key)
+        try:
+            result = await obstore.get_async(self._store, key)
+            return bytes(await result.bytes_async())
+        except FileNotFoundError as exc:
+            raise ObjectNotFound(key) from exc
+        except _STORE_ERRORS as exc:
+            raise ObjectStoreError(f"get {key!r} failed: {exc}") from exc
 
     async def stat(self, key: str) -> ObjectStat:
-        return await asyncio.to_thread(self._store.stat, key)
+        try:
+            meta = await obstore.head_async(self._store, key)
+        except FileNotFoundError as exc:
+            raise ObjectNotFound(key) from exc
+        except _STORE_ERRORS as exc:
+            raise ObjectStoreError(f"stat {key!r} failed: {exc}") from exc
+        return _stat(key, meta)
 
     async def delete(self, key: str) -> None:
-        await asyncio.to_thread(self._store.delete, key)
+        try:
+            await obstore.delete_async(self._store, key)
+        except FileNotFoundError:
+            pass
+        except _STORE_ERRORS as exc:
+            raise ObjectStoreError(f"delete {key!r} failed: {exc}") from exc
 
     async def delete_prefix(self, prefix: str) -> int:
-        return await asyncio.to_thread(self._store.delete_prefix, prefix)
+        keys = await self.list_prefix(prefix)
+        if not keys:
+            return 0
+        try:
+            await obstore.delete_async(self._store, keys)
+        except FileNotFoundError:
+            pass
+        except _STORE_ERRORS as exc:
+            raise ObjectStoreError(f"delete_prefix {prefix!r} failed: {exc}") from exc
+        return len(keys)
 
     async def list_prefix(self, prefix: str) -> list[str]:
-        return await asyncio.to_thread(self._store.list_prefix, prefix)
-
-
-def _is_missing(exc: ClientError) -> bool:
-    """Whether a ClientError is a 404 rather than a real failure.
-
-    S3 answers a missing key with NoSuchKey on GET and a bare 404 with no error
-    code on HEAD, so the status is checked as well as the code.
-    """
-    error = exc.response.get("Error", {})
-    if error.get("Code") in ("NoSuchKey", "404", "NotFound"):
-        return True
-    return exc.response.get("ResponseMetadata", {}).get("HTTPStatusCode") == 404
+        try:
+            return [
+                meta["path"]
+                async for batch in obstore.list(self._store, prefix=prefix)
+                for meta in batch
+            ]
+        except _STORE_ERRORS as exc:
+            raise ObjectStoreError(f"list {prefix!r} failed: {exc}") from exc
 
 
 @lru_cache
