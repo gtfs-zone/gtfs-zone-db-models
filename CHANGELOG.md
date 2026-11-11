@@ -1,3 +1,9 @@
+## v0.4.0 (2026-11-12)
+
+### Feat
+
+- **object-store**: optional Cache-Control on put
+
 ## v0.3.0 (2026-11-05)
 
 ### Feat
