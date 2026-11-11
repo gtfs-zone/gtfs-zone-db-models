@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import asyncio
 
+import obstore
 import pytest
 from obstore.store import MemoryStore
 
@@ -36,6 +37,23 @@ def test_unconfigured_endpoint_refuses_to_build():
 def test_put_then_get_round_trips(store):
     store.put("feeds/1/abc.zip", b"PK\x03\x04payload")
     assert store.get("feeds/1/abc.zip") == b"PK\x03\x04payload"
+
+
+def test_put_stores_content_type_and_cache_control(store):
+    store.put(
+        "pages/index.json",
+        b"{}",
+        content_type="application/json",
+        cache_control="public, max-age=600",
+    )
+    attributes = obstore.get(store.store, "pages/index.json").attributes
+    assert attributes["Content-Type"] == "application/json"
+    assert attributes["Cache-Control"] == "public, max-age=600"
+
+
+def test_put_without_cache_control_sets_none(store):
+    store.put("feeds/1/abc.zip", b"x")
+    assert "Cache-Control" not in obstore.get(store.store, "feeds/1/abc.zip").attributes
 
 
 def test_get_missing_raises_not_found(store):
@@ -88,8 +106,10 @@ def test_async_store_matches_the_sync_one(store):
 
     async def run():
         await async_store.put("feeds/1/a.zip", b"abc")
-        await async_store.put("feeds/1/b.zip", b"d")
+        await async_store.put("feeds/1/b.zip", b"d", cache_control="no-cache")
         assert await async_store.get("feeds/1/a.zip") == b"abc"
+        attributes = obstore.get(store.store, "feeds/1/b.zip").attributes
+        assert attributes["Cache-Control"] == "no-cache"
         assert (await async_store.stat("feeds/1/a.zip")).size_bytes == 3
         assert await async_store.list_prefix("feeds/1/") == [
             "feeds/1/a.zip",

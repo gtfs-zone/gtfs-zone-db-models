@@ -55,6 +55,14 @@ class ObjectStoreSettings(BaseSettings):
     s3_region: str = "garage"
 
 
+def _attributes(content_type: str, cache_control: str | None) -> dict[str, str]:
+    """The object metadata a put stores and the store later serves as headers."""
+    attributes = {"Content-Type": content_type}
+    if cache_control is not None:
+        attributes["Cache-Control"] = cache_control
+    return attributes
+
+
 class ObjectStat(NamedTuple):
     key: str
     size_bytes: int
@@ -126,7 +134,12 @@ class ObjectStore:
         return self._store
 
     def put(
-        self, key: str, body: bytes, *, content_type: str = "application/zip"
+        self,
+        key: str,
+        body: bytes,
+        *,
+        content_type: str = "application/zip",
+        cache_control: str | None = None,
     ) -> None:
         try:
             # One PUT keeps the ETag an md5 of the body.
@@ -135,7 +148,7 @@ class ObjectStore:
                 key,
                 body,
                 use_multipart=False,
-                attributes={"Content-Type": content_type},
+                attributes=_attributes(content_type, cache_control),
             )
         except _STORE_ERRORS as exc:
             raise ObjectStoreError(f"put {key!r} failed: {exc}") from exc
@@ -207,7 +220,12 @@ class AsyncObjectStore:
         self._store = store.store
 
     async def put(
-        self, key: str, body: bytes, *, content_type: str = "application/zip"
+        self,
+        key: str,
+        body: bytes,
+        *,
+        content_type: str = "application/zip",
+        cache_control: str | None = None,
     ) -> None:
         try:
             await obstore.put_async(
@@ -215,7 +233,7 @@ class AsyncObjectStore:
                 key,
                 body,
                 use_multipart=False,
-                attributes={"Content-Type": content_type},
+                attributes=_attributes(content_type, cache_control),
             )
         except _STORE_ERRORS as exc:
             raise ObjectStoreError(f"put {key!r} failed: {exc}") from exc
